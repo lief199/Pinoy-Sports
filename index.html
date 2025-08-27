@@ -4,7 +4,85 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Arnis: Stick Fighter</title>
-    <link rel="stylesheet" href="style.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(135deg, #7f5fc5, #5e3b8f);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #fff;
+            overflow: hidden;
+        }
+
+        #game-container {
+            width: 800px;
+            height: 500px;
+            background-color: rgba(255, 255, 255, 0.1);
+            position: relative;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+        }
+
+        .character {
+            width: 60px;
+            height: 60px;
+            position: absolute;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+            background-color: #f9c74f;
+        }
+
+        #player {
+            background-color: #00bfff;
+            bottom: 15px;
+            left: 100px;
+            transition: left 0.1s ease, bottom 0.1s ease;
+        }
+
+        #enemy {
+            background-color: #ff5733;
+            bottom: 15px;
+            right: 100px;
+            transition: left 0.1s ease, bottom 0.1s ease;
+        }
+
+        #score {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            font-size: 24px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .button {
+            background-color: #4CAF50;
+            padding: 10px 20px;
+            color: white;
+            font-size: 18px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .button:hover {
+            background-color: #45a049;
+        }
+
+        .button:focus {
+            outline: none;
+        }
+    </style>
 </head>
 <body>
     <div id="game-container">
@@ -12,6 +90,92 @@
         <div id="enemy" class="character"></div>
         <div id="score">Score: 0</div>
     </div>
-    <script src="game.js"></script>
+
+    <script>
+        // Variables for the game
+        const player = document.getElementById('player');
+        const enemy = document.getElementById('enemy');
+        const scoreElement = document.getElementById('score');
+        let score = 0;
+
+        // Player controls
+        let playerX = 100;
+        let playerY = 350;
+        const playerSpeed = 6;
+
+        // Enemy controls
+        let enemyX = 700;
+        let enemyY = 350;
+        const enemySpeed = 2;
+
+        // Game constants
+        const gameArea = document.getElementById('game-container');
+        const gameWidth = gameArea.clientWidth;
+        const gameHeight = gameArea.clientHeight;
+
+        // Movement listener
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') {
+                playerX -= playerSpeed;
+            } else if (e.key === 'ArrowRight') {
+                playerX += playerSpeed;
+            } else if (e.key === 'ArrowUp') {
+                playerY -= playerSpeed;
+            } else if (e.key === 'ArrowDown') {
+                playerY += playerSpeed;
+            } else if (e.key === ' ') {
+                // Attack logic
+                attackEnemy();
+            }
+
+            // Update player position
+            updatePlayerPosition();
+        });
+
+        // Update player position
+        function updatePlayerPosition() {
+            // Keep player within game boundaries
+            if (playerX < 0) playerX = 0;
+            if (playerX > gameWidth - 60) playerX = gameWidth - 60;
+            if (playerY < 0) playerY = 0;
+            if (playerY > gameHeight - 60) playerY = gameHeight - 60;
+
+            player.style.left = playerX + 'px';
+            player.style.bottom = playerY + 'px';
+        }
+
+        // Enemy AI movement
+        function enemyMovement() {
+            const direction = Math.random() > 0.5 ? 1 : -1;  // Random movement direction
+            enemyX += enemySpeed * direction;
+
+            if (enemyX < 0) enemyX = 0;
+            if (enemyX > gameWidth - 60) enemyX = gameWidth - 60;
+
+            enemy.style.left = enemyX + 'px';
+            enemy.style.bottom = enemyY + 'px';
+        }
+
+        // Attack Logic (simplified)
+        function attackEnemy() {
+            const attackRange = 50; // distance for attack to land
+
+            if (Math.abs(playerX - enemyX) < attackRange && Math.abs(playerY - enemyY) < attackRange) {
+                score += 10;
+                scoreElement.textContent = 'Score: ' + score;
+                // Reset enemy position after hit
+                enemyX = Math.random() * (gameWidth - 60);
+            }
+        }
+
+        // Main game loop
+        function gameLoop() {
+            enemyMovement();
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Start the game loop
+        gameLoop();
+    </script>
 </body>
 </html>
